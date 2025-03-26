@@ -81,7 +81,8 @@ class AirLabDownloader(object):
             print('--')
             if isfile(target_file_name):
                 print_error('Error: Target file {} already exists..'.format(target_file_name))
-                return False, None
+                continue
+                #  return False, None
 
             print(f"  Downloading {source_file_name} from {self.bucket_name}...")
             self.client.fget_object(self.bucket_name, source_file_name, target_file_name)
@@ -224,35 +225,70 @@ if __name__ == '__main__':
         print('--only-flow and --only-mask tags can not be set at the same time!')
         exit()
 
-    # read all the zip file urls
-    with open('download_training_zipfiles.txt') as f:
-        lines = f.readlines()
-    zipsizelist = [ll.strip().split() for ll in lines if ll.strip().split()[0].endswith('.zip')]
+    part_download = True
+    if part_download:
+        # read all the zip file urls
+        with open('download_training_zipfiles.txt') as f:
+            lines = f.readlines()
+        zipsizelist = [ll.strip().split() for ll in lines if ll.strip().split()[0].endswith('.zip')]
+        max_size = 30
 
-    downloadlist = []
-    for zipfile, _ in zipsizelist:
-        zf = zipfile.split('/')
-        filename = zf[-1]
-        difflevel = zf[-2]
+        downloadlist = []
+        for zipfile, _ in zipsizelist:
+            zf = zipfile.split('/')
+            filename = zf[-1]
+            difflevel = zf[-2]
 
-        # image/depth/seg/flow
-        filetype = filename.split('_')[0] 
-        # left/right/flow/mask
-        cameratype = filename.split('.')[0].split('_')[-1]
-        
-        if (difflevel in levellist) and (filetype in typelist) and (cameratype in cameralist):
-            downloadlist.append(zipfile) 
+            # image/depth/seg/flow
+            filetype = filename.split('_')[0] 
+            # left/right/flow/mask
+            cameratype = filename.split('.')[0].split('_')[-1]
+            
+            if (difflevel in levellist) and (filetype in typelist) and (cameratype in cameralist):
+                downloadlist.append(zipfile) 
+            if (get_size(zipsizelist, downloadlist) > max_size):
+                break
 
-    if len(downloadlist)==0:
-        print('No file meets the condition!')
-        exit()
+        if len(downloadlist)==0:
+            print('No file meets the condition!')
+            exit()
 
-    print_highlight('{} files are going to be downloaded...'.format(len(downloadlist)))
-    for fileurl in downloadlist:
-        print ('  -', fileurl)
+        print_highlight('{} files are going to be downloaded...'.format(len(downloadlist)))
+        for fileurl in downloadlist:
+            print ('  -', fileurl)
 
-    all_size = get_size(zipsizelist, downloadlist)
-    print_highlight('*** Total Size: {} GB ***'.format(all_size))
+        all_size = get_size(zipsizelist, downloadlist)
+        print_highlight('*** Total Size: {} GB ***'.format(all_size))
+    else:
+        # read all the zip file urls
+        with open('download_training_zipfiles.txt') as f:
+            lines = f.readlines()
+        zipsizelist = [ll.strip().split() for ll in lines if ll.strip().split()[0].endswith('.zip')]
+
+        downloadlist = []
+        for zipfile, _ in zipsizelist:
+            zf = zipfile.split('/')
+            filename = zf[-1]
+            difflevel = zf[-2]
+
+            # image/depth/seg/flow
+            filetype = filename.split('_')[0] 
+            # left/right/flow/mask
+            cameratype = filename.split('.')[0].split('_')[-1]
+            
+            if (difflevel in levellist) and (filetype in typelist) and (cameratype in cameralist):
+                downloadlist.append(zipfile) 
+
+        if len(downloadlist)==0:
+            print('No file meets the condition!')
+            exit()
+
+        print_highlight('{} files are going to be downloaded...'.format(len(downloadlist)))
+        for fileurl in downloadlist:
+            print ('  -', fileurl)
+
+        all_size = get_size(zipsizelist, downloadlist)
+        print_highlight('*** Total Size: {} GB ***'.format(all_size))
 
     # download_from_cloudflare_r2(s3, downloadlist, outdir, bucket_name)
     res, downloadfilelist = downloader.download(downloadlist, outdir)
