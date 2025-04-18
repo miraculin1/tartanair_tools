@@ -231,8 +231,10 @@ if __name__ == '__main__':
         with open('download_training_zipfiles.txt') as f:
             lines = f.readlines()
         zipsizelist = [ll.strip().split() for ll in lines if ll.strip().split()[0].endswith('.zip')]
-        max_size = 30
+        start_size = 30
+        end_size = 50
 
+        total_downloadlist = []
         downloadlist = []
         for zipfile, _ in zipsizelist:
             zf = zipfile.split('/')
@@ -243,17 +245,24 @@ if __name__ == '__main__':
             filetype = filename.split('_')[0] 
             # left/right/flow/mask
             cameratype = filename.split('.')[0].split('_')[-1]
-            
+            if (get_size(zipsizelist, total_downloadlist) < start_size):
+                if (difflevel in levellist) and (filetype in typelist) and (cameratype in cameralist):
+                    total_downloadlist.append(zipfile) 
+                continue
+
             if (difflevel in levellist) and (filetype in typelist) and (cameratype in cameralist):
                 downloadlist.append(zipfile) 
-            if (get_size(zipsizelist, downloadlist) > max_size):
+                total_downloadlist.append(zipfile)
+            if (get_size(zipsizelist, total_downloadlist) > end_size):
                 break
 
         if len(downloadlist)==0:
             print('No file meets the condition!')
             exit()
 
+        print_highlight('{} files are going to be pre_downloaded...'.format(len(total_downloadlist)))
         print_highlight('{} files are going to be downloaded...'.format(len(downloadlist)))
+        raise NotImplementedError
         for fileurl in downloadlist:
             print ('  -', fileurl)
 
