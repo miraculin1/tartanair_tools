@@ -262,7 +262,6 @@ if __name__ == '__main__':
 
         print_highlight('{} files are going to be pre_downloaded...'.format(len(total_downloadlist)))
         print_highlight('{} files are going to be downloaded...'.format(len(downloadlist)))
-        raise NotImplementedError
         for fileurl in downloadlist:
             print ('  -', fileurl)
 
