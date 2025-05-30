@@ -1,2 +1,4 @@
 *.pyc
 downloaded
+.cache
+build
