@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 set(CMAKE_PREFIX_PATH "/opt/ros/noetic" ${CMAKE_PREFIX_PATH})
 
+find_package(OpenMP REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(cnpy REQUIRED)  # 通过 find_package 找 cnpy
@@ -24,5 +25,6 @@ target_link_libraries(${PROJECT_NAME}
   Eigen3::Eigen
   /opt/ros/noetic/lib/libcnpy.so
   ${PCL_LIBRARIES}
+  OpenMP::OpenMP_CXX
 )
 
